@@ -5,7 +5,7 @@
 
   "name": "my-glitch-template",
   "version": "0.0.1",
-  "description": "What am I about?",
+  "description": "Template",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -17,7 +17,7 @@
     "node": "8.x"
   },
   "repository": {
-    "url": "https://glitch.com/edit/#!/welcome-project"
+    "url": "https://github.com/Dereje1/glitchtemplate"
   },
   "license": "MIT",
   "keywords": [
