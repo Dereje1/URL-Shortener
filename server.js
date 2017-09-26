@@ -21,8 +21,7 @@ app.get("/:shorturlVal", function (req, res) {//for redirecting a succesfully sh
   let lookForURL = findURL(dbLink,shortURLID,false)//search database for url id , bylink=false means search by id
   lookForURL.then(function(found){//lookForURL returns a promise so must wait with then
     if(found.length===0){//if not found return error
-      res.send("Can Not find URL ID " + shortURLID)
-      res.end()
+      res.end(JSON.stringify({"error" : shortURLID + " Is not in the database"}))
     }
     else{//if found redirect
       res.redirect(found[0]['originalURL'])
