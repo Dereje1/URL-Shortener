@@ -39,7 +39,7 @@ app.get('/input/:linkVal*', function(req,res){///process url shortening request,
   }
   let urlValidity = /^(ftp|http|https):\/\/[^ "]+$/.test(originalURL);//use rexgex to verify url protocol
   if(!urlValidity){
-    res.end(originalURL + ", Is an Invalid URL format, Try again!")
+    res.end(JSON.stringify({"error" : originalURL + ", Is an Invalid URL format, Try again!"}))
     return;//make sure leaves get otherwise will enter invalid url into database
   }
   //first look if requested url is already in databse
@@ -48,18 +48,24 @@ app.get('/input/:linkVal*', function(req,res){///process url shortening request,
     if(urldocs.length===0){//url was not found prepare to insert new url
       let shortURLID = makeid()//make a random text to serve as id
       insertURL(dbLink,originalURL,shortURLID).then(function(report){//call insert url function and report results with promise
-        res.end("Original URL: " + originalURL +
-                "\nNew ID      : " + shortURLID +
-                "\nNew Link    : " + req.headers.referer + shortURLID +
-                "\nCreated     : " + Date(Date.now().toString()))
+        let jsonConstruct={
+          "Original URL" : originalURL,
+          "New ID" : shortURLID,
+          "New Link": req.headers.referer + shortURLID,
+          "Time Stamp": (Date.now().toString())
+        }
+        res.end(JSON.stringify(jsonConstruct))
 
       })
     }
     else{//url already exists in database no need to insert just report
-      res.end("Original URL: " + urldocs[0]["originalURL"] +
-              "\nID          : " + urldocs[0]["shortenedURL"] +
-              "\nLink        : " + req.headers.referer + urldocs[0]["shortenedURL"] +
-              "\nCreated     : " + new Date(urldocs[0]["timeStamp"]).toString())
+      let jsonConstruct={
+        "Original URL" : urldocs[0]["originalURL"],
+        "ID" : urldocs[0]["shortenedURL"],
+        "Link": req.headers.referer + urldocs[0]["shortenedURL"],
+        "Time Stamp": (urldocs[0]["timeStamp"]).toString()
+      }
+      res.end(JSON.stringify(jsonConstruct))
     }
   })
 })

@@ -30,6 +30,7 @@ body .container-fluid #instructions .panel {
 
 body .container-fluid #instructions .panel-body {
   color: black;
+  word-break: break-all;
 }
 
 body .container-fluid #instructions .usage {
