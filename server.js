@@ -1,30 +1,30 @@
 var express = require('express');
 var app = express();
 
+//use mongodb
 let mongo = require('mongodb').MongoClient
-
+//set database link to environemnt to protect from public access
 let dbLink =process.env.MONGOLAB_URI
-
 
 app.use(express.static('public'));
 
-app.get("/", function (req, res) {
+app.get("/", function (req, res) {//default page
   res.sendFile(__dirname + '/views/index.html');
 });
 
-createDBNew(dbLink).then(function(dbStatus){
+createDBNew(dbLink).then(function(dbStatus){//Initializes a new collection if it doesn't already exist
   console.log(dbStatus)
 })
 
-app.get("/:shorturlVal", function (req, res) {
+app.get("/:shorturlVal", function (req, res) {//for redirecting a succesfully shortened url
   let shortURLID = req.params.shorturlVal
-  let lookForURL = findURL(dbLink,shortURLID,false)
-  lookForURL.then(function(found){
-    if(found.length===0){
+  let lookForURL = findURL(dbLink,shortURLID,false)//search database for url id , bylink=false means search by id
+  lookForURL.then(function(found){//lookForURL returns a promise so must wait with then
+    if(found.length===0){//if not found return error
       res.send("Can Not find URL ID " + shortURLID)
       res.end()
     }
-    else{
+    else{//if found redirect
       res.redirect(found[0]['originalURL'])
       res.end()
     }
@@ -32,18 +32,19 @@ app.get("/:shorturlVal", function (req, res) {
 });
 
 
-app.get('/input/:linkVal*', function(req,res){///does not take care of ? and possibly other characters
+app.get('/input/:linkVal*', function(req,res){///does not take care of ? in https must fix and possibly other characters
   let originalURL = req.params.linkVal+req.params['0']
-  let urlValidity = /^(ftp|http|https):\/\/[^ "]+$/.test(originalURL);
+  let urlValidity = /^(ftp|http|https):\/\/[^ "]+$/.test(originalURL);//use rexgex to verify url protocol
   if(!urlValidity){
-    res.end("Invalid URL detected, Try again!")
+    res.end(originalURL + ", Is an Invalid URL format, Try again!")
+    return;//make sure leaves get otherwise will enter invalid url into database
   }
-  let shortURLID = makeid()
-  //first find if it is a duplicate url
-  let duplicateURL = findURL(dbLink,originalURL)
-  duplicateURL.then(function(urldocs){
-    if(urldocs.length===0){//insert a new URL document
-      insertURL(dbLink,originalURL,shortURLID).then(function(report){
+  //first look if requested url is already in databse
+  let lookForURL = findURL(dbLink,originalURL)//bylink=true, look for url
+  lookForURL.then(function(urldocs){//lookForURL returns a promise so must wait with then
+    if(urldocs.length===0){//url was not found prepare to insert new url
+      let shortURLID = makeid()//make a random text to serve as id
+      insertURL(dbLink,originalURL,shortURLID).then(function(report){//call insert url function and report results with promise
         res.end("Original URL: " + originalURL +
                 "\nNew ID      : " + shortURLID +
                 "\nNew Link    : " + req.headers.referer + shortURLID +
@@ -51,7 +52,7 @@ app.get('/input/:linkVal*', function(req,res){///does not take care of ? and pos
 
       })
     }
-    else{//respond with the existing document
+    else{//url already exists in database no need to insert just report
       res.end("Original URL: " + urldocs[0]["originalURL"] +
               "\nID          : " + urldocs[0]["shortenedURL"] +
               "\nLink        : " + req.headers.referer + urldocs[0]["shortenedURL"] +
@@ -65,26 +66,30 @@ var listener = app.listen(process.env.PORT || 3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
 
+
 //all custom defined functions below, may try to include into an import in the future
-function makeid() {
-  var randomText = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+function makeid() {//makes a random shortened ID
+  let randomText = "";
+  //make alphanumeric
+  let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-  for (var i = 0; i < 5; i++)
+  for (let i = 0; i < 5; i++){
     randomText += possible.charAt(Math.floor(Math.random() * possible.length));
-
+  }
   return randomText;
 }
 
-function createDBNew(dbLink){
+function createDBNew(dbLink){//creates a new collection if it doesn't exist
+ // note this function is not really necesseray for app to function  but created while I was experimenting with
+ //mongodb, collections can be created on the fly with new document insertions
   let coll//if  not declared here will not be recognized down stream of the promises
-  return mongo.connect(dbLink)
+  return mongo.connect(dbLink)//will return connection status via chain of promises
     .then(function(db){
-      coll = db.collection('URLColl')
-      return coll.count()
+      coll = db.collection('URLColl')//if no collection will automatically create, if there is will refer to
+      return coll.count()//function counts total documents in collection
     })
     .then(function(docCount){
-      if(docCount===0){//initialize db with record if no records
+      if(docCount===0){//initialize collection with a new fake record
         let insertedObject = {
           originalURL: "Database Initialization",
           shortenedURL: "Database Initialization",
@@ -92,36 +97,37 @@ function createDBNew(dbLink){
         }
         console.log("Initializing collection with " + JSON.stringify(insertedObject))
         coll.insert(insertedObject)
-        return "Database Created"
+        return "Collection Initialized"
       }
-      else{
-        return "Database already exists"
+      else{//if documents found do nothing
+        return "Collection already exists"
       }
     })
     .catch(function(err) {
-        console.log("Error in Database Creation Module!!")
+        console.log("Error in Database/Collection Creation Module!!")
         throw err;
     });
 }
 
-function findURL(dbLink,userQuery, bylink=true){
+function findURL(dbLink,userQuery, bylink=true){// finds a requested URL, if bylink is true it will search
+  //by link, otherwise will search by urlid
   let query = bylink ? {originalURL: userQuery} : {shortenedURL: userQuery}
-  return mongo.connect(dbLink)
+  return mongo.connect(dbLink)//returns promise after finding
     .then(function(db){
-      let collection = db.collection('URLColl')//first specify collection
-      return collection.find(query).toArray()
+      let collection = db.collection('URLColl')//specify collection
+      return collection.find(query).toArray()//look for query and use built in array function
     })
-    .then(function(items) {
+    .then(function(items) {//the whole function will return this
       return items
     })
     .catch(function(err) {
         throw err;
     });
 }
-function insertURL(dbLink,original,idURL){
-  return mongo.connect(dbLink)
+function insertURL(dbLink,original,idURL){//inserts URL and new id into database
+  return mongo.connect(dbLink)//returns promise after inserting
     .then(function(db){
-      let collection = db.collection('URLColl')//first specify collection
+      let collection = db.collection('URLColl')//specify collection
       let insertedObject = {
         originalURL: original,
         shortenedURL: idURL,
@@ -129,7 +135,7 @@ function insertURL(dbLink,original,idURL){
       }
       return collection.insert(insertedObject)
     })
-    .then(function(newInsertion){
+    .then(function(newInsertion){//insert then log(for debugginh)
       console.log(original + " succesfully entered into DB")
     })
     .catch(function(err) {
