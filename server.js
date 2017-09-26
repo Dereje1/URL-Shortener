@@ -32,8 +32,11 @@ app.get("/:shorturlVal", function (req, res) {//for redirecting a succesfully sh
 });
 
 
-app.get('/input/:linkVal*', function(req,res){///does not take care of ? in https must fix and possibly other characters
-  let originalURL = req.params.linkVal+req.params['0']
+app.get('/input/:linkVal*', function(req,res){///process url shortening request, notice *
+  let originalURL = req.params.linkVal+req.params['0'] // use params which will get everyhting but queries
+  if (Object.keys(req.query).length!==0){//if there is a query add it into the link
+    originalURL= originalURL + "?" + Object.keys(req.query)[0] + "=" + req.query[Object.keys(req.query)[0]]
+  }
   let urlValidity = /^(ftp|http|https):\/\/[^ "]+$/.test(originalURL);//use rexgex to verify url protocol
   if(!urlValidity){
     res.end(originalURL + ", Is an Invalid URL format, Try again!")
