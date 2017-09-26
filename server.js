@@ -41,6 +41,8 @@ app.get('/input/:linkVal*', function(req,res){///process url shortening request,
     res.end(JSON.stringify({"error" : originalURL + ", Is an Invalid URL format, Try again!"}))
     return;//make sure leaves get otherwise will enter invalid url into database
   }
+  //need this to append to new shortened id to make a link, the first one is good for refering (submit) the second one works for calls from within the main page
+  let hostURL = (req.headers.referer||(req.protocol+"://"+req.headers.host+ "/"))
   //first look if requested url is already in databse
   let lookForURL = findURL(dbLink,originalURL)//bylink=true, look for url
   lookForURL.then(function(urldocs){//lookForURL returns a promise so must wait with then
@@ -50,7 +52,7 @@ app.get('/input/:linkVal*', function(req,res){///process url shortening request,
         let jsonConstruct={
           "Original URL" : originalURL,
           "New ID" : shortURLID,
-          "New Link": req.headers.referer + shortURLID,
+          "New Link": hostURL + shortURLID,
           "Time Stamp": (Date.now().toString())
         }
         res.end(JSON.stringify(jsonConstruct))
@@ -61,7 +63,7 @@ app.get('/input/:linkVal*', function(req,res){///process url shortening request,
       let jsonConstruct={
         "Original URL" : urldocs[0]["originalURL"],
         "ID" : urldocs[0]["shortenedURL"],
-        "Link": req.headers.referer + urldocs[0]["shortenedURL"],
+        "Link": hostURL + urldocs[0]["shortenedURL"],
         "Time Stamp": (urldocs[0]["timeStamp"]).toString()
       }
       res.end(JSON.stringify(jsonConstruct))
