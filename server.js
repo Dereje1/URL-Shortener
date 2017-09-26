@@ -36,7 +36,7 @@ app.get('/input/:linkVal*', function(req,res){///does not take care of ? and pos
   let originalURL = req.params.linkVal+req.params['0']
   let urlValidity = /^(ftp|http|https):\/\/[^ "]+$/.test(originalURL);
   if(!urlValidity){
-    res.end("Invalid URL deteceted, Try again!")
+    res.end("Invalid URL detected, Try again!")
   }
   let shortURLID = makeid()
   //first find if it is a duplicate url
@@ -46,7 +46,7 @@ app.get('/input/:linkVal*', function(req,res){///does not take care of ? and pos
       insertURL(dbLink,originalURL,shortURLID).then(function(report){
         res.end("Original URL: " + originalURL +
                 "\nNew ID      : " + shortURLID +
-                "\nNew Link    : " + "/" + shortURLID +
+                "\nNew Link    : " + req.headers.referer + shortURLID +
                 "\nCreated     : " + Date(Date.now().toString()))
 
       })
@@ -54,8 +54,8 @@ app.get('/input/:linkVal*', function(req,res){///does not take care of ? and pos
     else{//respond with the existing document
       res.end("Original URL: " + urldocs[0]["originalURL"] +
               "\nID          : " + urldocs[0]["shortenedURL"] +
-              "\nLink        : " + "/" + urldocs[0]["shortenedURL"] +
-              "\nCreated     : " + Date(urldocs[0]["timeStamp"]).toString())
+              "\nLink        : " + req.headers.referer + urldocs[0]["shortenedURL"] +
+              "\nCreated     : " + new Date(urldocs[0]["timeStamp"]).toString())
     }
   })
 })
@@ -67,13 +67,13 @@ var listener = app.listen(process.env.PORT || 3000, function () {
 
 //all custom defined functions below, may try to include into an import in the future
 function makeid() {
-  var text = "";
+  var randomText = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   for (var i = 0; i < 5; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
+    randomText += possible.charAt(Math.floor(Math.random() * possible.length));
 
-  return text;
+  return randomText;
 }
 
 function createDBNew(dbLink){
