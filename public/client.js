@@ -7,3 +7,15 @@
 $( document ).ready(function() {
     console.log( "I am ready on the Front End!!" );
 });
+
+function submitUrl(e){
+  e.preventDefault();
+  console.log($("#usr").val())
+  let win = window.open("https://www.google.com/", '_blank');
+  win.focus();
+  return false;
+}
+$('#urlSubmitForm').submit(function (e) {
+        e.preventDefault();
+        let win = window.open("http://localhost:3000/input/"+($("#usr").val()), '_blank');
+});

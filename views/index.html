@@ -10,8 +10,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>My Template</title>
-    <meta name="description" content="A Template for my Back-End Projects">
+    <title>URL Shortener Microservice</title>
+    <meta name="description" content="A URL Shortener Microservice">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,8 +20,43 @@
     <link rel="stylesheet" href="/style.css">
   </head>
   <body>
-    <div class ="container-fluid">
-        <div id="application"></div>
+      <div class ="container-fluid">
+        <div class="row">
+          <div class="col-md-6 col-md-offset-3 text-center" id="instructions">
+            <h1>URL Shortener Microservice</h1>
+            <h3>User Stories</h3>
+            <ol class="list-group">
+                <li class="list-group-item">I can pass a URL as a parameter and I will receive a shortened URL in the JSON response.</li>
+                <li class="list-group-item"> If I pass an invalid URL that doesn't follow the valid http://www.example.com format, the JSON response will contain an error instead.</li>
+                <li class="list-group-item">When I visit that shortened URL, it will redirect me to my original link.</li>
+            </ol>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h3 class="panel-title"><strong>Example Input</strong></h3>
+                </div>
+                <div class="panel-body">
+                  <form class="form-inline" id="urlSubmitForm">
+                        <label class="mr-sm-3" for="inlineFormCustomSelect">Paste URL to Shorten and Submit</label>
+                        <input type="text" class="form-control" id="usr">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                  </form>
+                  <h5>OR paste directly into browser with the following format:</h5>
+                  <p class="usage"><strong>https://timestamp-micro-serv.glitch.me/input/https://www.freecodecamp.org</strong></p>
+                </div>
+              </div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h3 class="panel-title"><strong>Example Output</strong></h3>
+                <div class="panel-body">
+                  <p class="usage"><strong>Original URL: https://www.freecodecamp.org<BR>
+New ID            &nbsp &nbsp &nbsp &nbsp&nbsp: U5eFu<BR>
+New Link    &nbsp &nbsp&nbsp: /U5eFu<BR>
+Created     &nbsp &nbsp&nbsp&nbsp : Mon Sep 25 2017 20:57:54 GMT-0400 (Eastern Daylight Time)</strong></p>
+                </div>
+                </div>
+              </div>
+          </div>
+        </div>
         <div class="row">
           <div class="col-md-12 text-center" id="info">
             Coded by <a href="https://www.freecodecamp.com/dereje1" target="_blank">DGetahun</a>

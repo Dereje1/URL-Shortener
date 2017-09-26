@@ -9,6 +9,33 @@ body .container-fluid {
   margin-right: 5%;
 }
 
+body .container-fluid #instructions {
+  color: white;
+}
+
+body .container-fluid #instructions .list-group {
+  list-style: decimal inside;
+  text-align: left;
+  color: black;
+  font-size: 120%;
+}
+
+body .container-fluid #instructions .list-group-item {
+  display: list-item;
+}
+
+body .container-fluid #instructions .panel {
+  text-align: left;
+}
+
+body .container-fluid #instructions .panel-body {
+  color: black;
+}
+
+body .container-fluid #instructions .usage {
+  color: red;
+}
+
 body .container-fluid #info {
   margin-top: 30px;
   color: white;
