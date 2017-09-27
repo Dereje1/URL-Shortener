@@ -36,7 +36,7 @@ app.get('/input/:linkVal*', function(req,res){///process url shortening request,
   if (Object.keys(req.query).length!==0){//if there is a query add it into the link
     originalURL= originalURL + "?" + Object.keys(req.query)[0] + "=" + req.query[Object.keys(req.query)[0]]
   }
-  let urlValidity = /^(ftp|http|https):\/\/[^ "]+$/.test(originalURL);//use rexgex to verify url protocol
+  let urlValidity = /^(ftp|http|https):\/\/(www\.)[^ "]+$/.test(originalURL);//use rexgex to verify url protocol
   if(!urlValidity){
     res.end(JSON.stringify({"error" : originalURL + ", Is an Invalid URL format, Try again!"}))
     return;//make sure leaves get otherwise will enter invalid url into database
